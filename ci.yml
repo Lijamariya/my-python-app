@@ -1,0 +1,49 @@
+name: CI/CD Pipeline
+
+# Trigger the workflow on pushes and pull requests to the main branch
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # Job for building and testing the application
+  build:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu environment
+
+    steps:
+      # Step 1: Checkout the code from the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Step 2: Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      # Step 3: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Step 4: Run tests
+        run: |
+          python -m unittest discover
+
+  # Job for deploying the app to Heroku
+  deploy:
+    needs: build  # Ensure deployment runs only if build succeeds
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Step 5: Deploy to Heroku
+        run: |
+          heroku login
+          git push heroku main
